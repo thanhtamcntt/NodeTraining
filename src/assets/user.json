@@ -1,0 +1,14 @@
+[
+  {
+      "name": "admin",
+      "email": "admin@gmail.com",
+      "password": "123456",
+      "roleId": "6543c28ae4b2dbdf546106c3"
+  },
+  {
+      "name": "user",
+      "email": "user@gmail.com",
+      "password": "123456",
+      "roleId": "6543c28ae4b2dbdf546106c4"
+  }
+]

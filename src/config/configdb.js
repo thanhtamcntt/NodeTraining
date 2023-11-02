@@ -2,7 +2,7 @@ const mongoose = require('mongoose')
 require('dotenv').config();
 const colors = require('colors');
 
-module.exports = async function connectDb() {
+async function connectDb() {
   try {
     await mongoose.connect(process.env.MONGODB_URL, {
       useNewUrlParser: true,
@@ -13,3 +13,5 @@ module.exports = async function connectDb() {
     console.log(colors.red(err));
   }
 }
+
+module.exports = connectDb

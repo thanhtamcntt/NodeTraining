@@ -8,8 +8,11 @@ const PORT = process.env.PORT ? process.env.PORT : 4000;
 
 app.use(express.json());
 const Router = require('./routes/index')
+const ErrorHandler = require('./middlewares/error');
 
 app.use('/', Router)
+
+app.use(ErrorHandler.ErrorHandler)
 
 ConnectDb();
 

@@ -1,47 +1,36 @@
 const User = require('../../models/user');
 const bcrypt = require('bcryptjs');
 const asyncHandler = require('express-async-handler')
+const ErrorResponse = require('../../utils/errorResponse')
 
 exports.postLogin = asyncHandler(
   async (req, res, next) => {
+    console.log(req.body)
     const { email, password } = req.body;
     if(!email || !password) {
-     return res.status(404).json({
-        msg: "Please enter a valid email and password!!",
-        success: false,
-      })
-      // return next(new Error('Please enter a valid email and password!!'));
+      next(new ErrorResponse('Please enter a valid email and password!!',404));
     }
     
     const user = await User.findOne({email: email})
-
     if(!user)
     {
-      return res.status(404).json({
-        msg: "Account information or password is incorrect!!",
-        success: false,
-      })
-      // return next(new Error('account information or password is incorrect!!'));
+      next(new ErrorResponse('account information or password is incorrect!!',404));
     }
   
-    const passwordUser = await bcrypt.compare(password,user.password,);
-  
+    const passwordUser = await bcrypt.compare(password,user.password);
+    console.log(passwordUser);
     if(!passwordUser){
-      return res.status(404).json({
-        msg: "Account information or password is incorrect!!",
-        success: false,
-      })
-      // return next(new Error('account information or password is incorrect!!'));
+       next(new ErrorResponse('account information or password is incorrect!!',404));
     }
-    
-    const token = await user.getSignedJWTToken();
-    res.status(200).json({
-      token: token,
-      msg: "Login successfully",
-      success: true,
-      data: user
-    })
-  
+    else {
+      const token = await user.getSignedJWTToken();
+      res.status(200).json({
+        token: token,
+        msg: "Login successfully",
+        success: true,
+        data: user
+      })
+    }
   }
 )
 exports.postLogout = asyncHandler(
@@ -49,10 +38,7 @@ exports.postLogout = asyncHandler(
     const token = req.token;
 
     if (!token) {
-      return res.status(401).json({
-        msg: "No token found",
-        success: false,
-      });
+      next(new ErrorResponse('No token found',401));
     }
 
     req.token = null;
@@ -72,7 +58,7 @@ exports.postSignup = asyncHandler(
     const passwordUser = await bcrypt.hash(password, 12);
     const user = await User.create({name: name, email: email, password: passwordUser, roleId: roleId});
   
-    res.version(1.0).status(200).json({
+    res.status(200).json({
       msg: "Signup successfully",
       success: true,
       data: user
