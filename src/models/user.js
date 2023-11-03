@@ -25,8 +25,8 @@ const User = new Schema({
   },
   roleId : {
     type: Schema.Types.ObjectId,
+    ref: 'Role',
     required: true,
-    ref: 'Role'
   },
   createAt: {
     type: Date,
