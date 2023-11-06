@@ -10,6 +10,20 @@ const Todo = new Schema({
     type: Boolean,
     default: false
   },
+  imageURL: {
+    imageId : {
+      type: String,
+      required: true
+    },
+    url: {
+      type: String,
+      required: true
+    }
+  },
+  videoURL: {
+    type: String,
+    required: false
+  },
   userId: {
     type: Schema.Types.ObjectId,
     ref: 'User',
