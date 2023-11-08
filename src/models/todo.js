@@ -13,14 +13,24 @@ const Todo = new Schema({
   imageURL: {
     imageId : {
       type: String,
-      required: true
+      required: false
     },
     url: {
       type: String,
-      required: true
+      required: false
     }
   },
-  videoURL: {
+  videoURL:  {
+    videoId : {
+      type: String,
+      required: false
+    },
+    url: {
+      type: String,
+      required: false
+    }
+  },
+  description: {
     type: String,
     required: false
   },
@@ -32,6 +42,9 @@ const Todo = new Schema({
   createAt: {
     type: Date,
     default: Date.now
+  },
+  updateAt: {
+    type: Date
   }
 })
 

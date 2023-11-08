@@ -7,11 +7,10 @@ const DeleteFile = require('../utils/deleteFile');
 const CLIENT_ID = process.env.CLIENT_ID
 const CLIENT_SECRET = process.env.CLIENT_SECRET
 const REDIRECT_URL = process.env.REDIRECT_URL
-const REFRESH_TOKEN = process.env.REFRESH_TOKEN
-console.log(CLIENT_ID)
+const TOKEN_DRIVE = process.env.TOKEN_DRIVE
 
 const oauth2Client = new google.auth.OAuth2(CLIENT_ID, CLIENT_SECRET, REDIRECT_URL);
-oauth2Client.setCredentials({refresh_token: REFRESH_TOKEN});
+oauth2Client.setCredentials({refresh_token: TOKEN_DRIVE});
 
 const drive = google.drive({
   version: 'v3',
@@ -33,17 +32,16 @@ const PublicFile =  async (id) => {
 }
 
 exports.UploadFile = async (image, share) => {
-  console.log("image: " + image.filename);
 
   try {
     
     const createFile = await drive.files.create({
       requestBody: {
-        name: image.filename,
+        name: image[0].filename,
       },
       media: {
-        mimeType: image.mimetype,
-        body: fs.createReadStream(path.join(__dirname,`../images/${image.filename}`))
+        mimeType: image[0].mimetype,
+        body: fs.createReadStream(path.join(__dirname,`../images/${image[0].filename}`))
       }
     })
     if(share) {
@@ -53,7 +51,7 @@ exports.UploadFile = async (image, share) => {
       fileId: createFile.data.id,
       fields: 'webViewLink'
     })
-    DeleteFile(image.filename)
+    await DeleteFile(image[0].filename, 'image')
     return {
       url:infoUrlImage.data.webViewLink,
       imageId : createFile.data.id
