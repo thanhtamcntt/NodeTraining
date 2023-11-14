@@ -2,6 +2,17 @@ const User = require('../../models/user');
 const bcrypt = require('bcryptjs');
 const asyncHandler = require('express-async-handler')
 const ErrorResponse = require('../../utils/errorResponse')
+const randomBytes = require('randombytes');
+const nodemailer = require('nodemailer');
+const sgTransport = require('nodemailer-sendgrid-transport');
+require('dotenv').config()
+
+var options = {
+  auth: {
+      api_key: process.env.SENGRID_KEY
+  }
+}
+var mailer = nodemailer.createTransport(sgTransport(options));
 
 exports.postLogin = asyncHandler(
   async (req, res, next) => {
@@ -64,5 +75,69 @@ exports.postSignup = asyncHandler(
       data: user
     })
   
+  }
+)
+
+exports.postResetPassword = asyncHandler(
+  async (req, res, next) => {
+    const { email} = req.body;
+    
+    randomBytes(32, async (err, resp) => {
+        const emailUser = await User.findOne({email: email})
+        console.log(resp)
+        const token = resp.toString('hex')
+        if(!emailUser) {
+          next(new ErrorResponse('Email user does not exist!!',404));
+        }
+        emailUser.resetToken = token
+        emailUser.tokenExpiration = Date.now() + 1800000
+        await emailUser.save()
+        const sendMail = {
+          to: email,
+          from: 'hoangphuocloc.phurieng@gmail.com',
+          subject: 'Reset Password',
+          text: `Hello ${email}`,
+          html: `You please click <a href="http://localhost:4000/auth/new-password/:${token}">link</a> to retrieve your password`
+      };
+       
+      mailer.sendMail(sendMail, function(err, res) {
+          if (err) { 
+              console.log(err) 
+          }
+          console.log(res);
+      });
+
+      res.status(200).json({
+        msg: "Successfully",
+        success: true,
+        data: emailUser
+      })
+    })
+  }
+)
+
+exports.postNewPassword = asyncHandler(
+  async (req, res, next) => {
+    const  { newPassword, confirmNewPassword, token } = req.body;
+    console.log(token);
+    const user = await User.findOne({resetToken: token , tokenExpiration : { $gt: Date.now()} });
+    console.log("user", user)
+    if(!user) {
+      next(new ErrorResponse('User does not exist!!',404));
+    }
+
+    if(newPassword !== confirmNewPassword) {
+      next(new ErrorResponse('Passwords do not match',422));
+    }
+    else {
+      const hashPassword = await bcrypt.hash(newPassword, 12)
+      user.password = hashPassword
+      user.resetToken = ""
+      await user.save()
+      res.status(200).json({
+        msg: "Reset password successfully",
+        success: true,
+      })
+    }
   }
 )

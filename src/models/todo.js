@@ -30,6 +30,10 @@ const Todo = new Schema({
       required: false
     }
   },
+  shortDescription: {
+    type: String,
+    required: false
+  },
   description: {
     type: String,
     required: false
@@ -41,7 +45,15 @@ const Todo = new Schema({
   },
   createAt: {
     type: Date,
-    default: Date.now
+    default: Date.now()
+  },
+  oldTodo : {
+    type: Date,
+    default: function() {
+      let currentDate = new Date();
+      currentDate.setMonth(currentDate.getMonth() + 6)
+      return currentDate
+    }
   },
   updateAt: {
     type: Date
